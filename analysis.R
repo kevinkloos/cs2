@@ -199,3 +199,17 @@ all_prevs |>
   geom_smooth() +
   facet_wrap(~ quant_comp)
 
+
+ae_dfr <- 
+  all_prevs |>
+  mutate(id = 1:n(), .before = cs_norm_opt,
+         ks_dis = ks_vals_r) |>
+  select(id, cs_skew_opt, ms, dys, sld, prev_true, ks_dis) |>
+  rename(cs = cs_skew_opt) |>
+  transmute(ae_cs = abs(cs - prev_true),
+            ae_ms = abs(ms - prev_true),
+            ae_dys = abs(dys - prev_true),
+            ae_sld = abs(sld - prev_true)) |>
+  pivot_longer(cols = everything(), names_to = "quantifier", values_to = "ae")
+
+pairwise.wilcox.test(ae_dfr$ae, ae_dfr$quantifier, p.adjust.method="holm")
